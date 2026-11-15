@@ -92,3 +92,26 @@ Airflow runs on the dev PC. ERPNext, PostgreSQL, MinIO, and Redpanda run on the 
 ### Silver validation
 
 - [ ] Normalize the bank and ERP ledger records. Verify that the ₹10,000 withdrawal matches the ERPNext bank ledger credit and that the ₹250 bank charge remains unmatched.
+
+enterprise-data-ai-platform/
+├── .gitignore
+└── data-platform/
+    ├── .env                         # Local settings and credentials, ignored by Git
+    ├── .env.example                 # Shared template, committed without secrets
+    ├── README.md                    # Setup and run order for all three layers
+    ├── source-setup/
+    │   └── seed_sources.py
+    ├── data-layer/
+    │   └── airflow/
+    │       └── .env                 # Separate local Airflow Compose settings
+    └── src/
+        └── data_platform/
+            └── reconciliation/
+                ├── bronze/
+                │   ├── delta_smoke_test.ipynb       # Optional connectivity check
+                │   ├── bronze_erpnext_ingestion.ipynb
+                │   └── bronze_mapping_statement.ipynb
+                ├── silver/
+                │   └── silver_reconciliation.ipynb
+                └── gold/
+                    └── gold_bank_reconciliation.ipynb
