@@ -11,14 +11,14 @@ git clone https://github.com/frappe/frappe_docker.git
 cd frappe_docker
 docker compose -p reconciliation-erp -f pwd.yml up -d
 docker compose -p reconciliation-erp -f pwd.yml logs -f create-site
+
+$seed = "..\data-ai-platform\source-setup\seed_erpnext_demo.py"
+
+docker compose -p reconciliation-erp -f pwd.yml cp "$seed" backend:/tmp/seed_erpnext_demo.py
+docker compose -p reconciliation-erp -f pwd.yml exec -T -w /home/frappe/frappe-bench backend ./env/bin/python -u /tmp/seed_erpnext_demo.py frontend
 ```
 
 Once site initialization completes, open http://localhost:8080. Use the demo on a trusted local machine. Create a demo company in INR with a bank and an expense account. Submit a balanced journal that debits the expense and credits the bank by INR 10,000. Record the exact company and bank ledger account names.
-
-```bash
-docker compose -p reconciliation-erp -f pwd.yml exec -T backend \
-  ./env/bin/python - frontend < /path/to/data-platform/source-setup/seed_erpnext_demo.py
-```
 
 Give a separate API user read access to the relevant GL Entry records. Verify that a GET request to `/api/resource/GL%20Entry` filtered to the company and bank account returns the posted credit and a stable record identifier. Keep API credentials out of Git.
 
