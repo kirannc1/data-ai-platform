@@ -34,6 +34,27 @@ docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-
 
 Run the query once initialization completes. Expect one mapping for `BANK-INR-001`. PostgreSQL listens on localhost port 5433 for host clients.
 
+## Redpanda for events and MinIO for file storage
+
+| Component | Role in bank reconciliation | First demo input |
+|---|---|---|
+| MinIO | Stores original bank statement files for ingestion and replay | A synthetic CSV with a ₹10,000 withdrawal |
+| Redpanda | Delivers events that trigger ingestion | A `bank.statement.received` event pointing to the CSV in MinIO |
+
+```bash
+docker compose -p reconciliation-sources -f compose.sources.yml up -d
+docker compose -p reconciliation-sources -f compose.sources.yml ps
+```
+
+MinIO — Open the console, sign in with demo-storage / demo-storage-local, and create a bucket named bank-statements. The S3 API endpoint is http://localhost:19000.
+
+Redpanda — Create the bank.statement.received topic and verify it appears in the broker:
+```
+docker compose -p reconciliation-sources -f compose.sources.yml exec -T redpanda rpk topic create bank.statement.received -X brokers=redpanda:9092
+docker compose -p reconciliation-sources -f compose.sources.yml exec -T redpanda rpk topic list -X brokers=redpanda:9092
+```
+
+
 ## First integration check
 
 Use the mapping to select the ERP cash account. Confirm that the posted INR 10,000 credit matches a synthetic statement withdrawal for the mapped account, using the payment reference where available. The statement generator and Kafka producer are later implementation steps.
