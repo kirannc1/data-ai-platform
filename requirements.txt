@@ -1,0 +1,5 @@
+-r data-platform/requirements.txt
+-r ai-platform/requirements.txt
+-e ./data-platform
+-e ./ai-platform
+pytest>=8,<10

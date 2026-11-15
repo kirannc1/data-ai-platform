@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: enterprise-data-platform
+Version: 0.1.0
+Summary: Local-first medallion pipeline scaffold.
+Requires-Python: >=3.11

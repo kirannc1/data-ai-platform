@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ED interview cheat sheet: enterprise data architecture (v3)</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f5f1;--sf:#fff;--ink:#17233a;--mut:#5a6578;--ln:#d9d6cc;--ac:#0f6b73;--acs:#d8ecee;--ad:#a35a00;--ads:#fbe9cf;--bz:#b5651d;--sv:#6b7785;--gd:#b8890b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1624;--sf:#182236;--ink:#e8ecf3;--mut:#9aa6ba;--ln:#2c3a55;--ac:#5cc4cc;--acs:#173a40;--ad:#f0b25c;--ads:#3d2c12;--bz:#e39a5a;--sv:#aab4c3;--gd:#e6c04d}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1624;--sf:#182236;--ink:#e8ecf3;--mut:#9aa6ba;--ln:#2c3a55;--ac:#5cc4cc;--acs:#173a40;--ad:#f0b25c;--ads:#3d2c12;--bz:#e39a5a;--sv:#aab4c3;--gd:#e6c04d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0 0 .4em;font-weight:600}
+h1{font-size:1.5rem}h2{font-size:1.25rem}h3{font-size:1rem}
+header{padding:16px 16px 8px;max-width:1100px;margin:auto}
+header p{margin:0;color:var(--mut)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;border-bottom:1px solid var(--ln)}
+nav div{display:flex;gap:4px;overflow-x:auto;max-width:1100px;margin:auto;padding:8px 16px}
+nav button{flex:none;border:1px solid var(--ln);background:var(--sf);color:var(--ink);padding:6px 12px;border-radius:6px;font:inherit;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+nav button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+main{max-width:1100px;margin:auto;padding:16px}
+section{display:none}section.on{display:block}
+.box{background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:12px}
+.g{display:grid;gap:10px}.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.mut{color:var(--mut)}.sm{font-size:.86rem}
+.add{border-left:4px solid var(--ad)}
+.tag{display:inline-block;background:var(--ads);color:var(--ad);font-size:.75rem;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.tl{display:flex;height:44px;border-radius:8px;overflow:hidden;border:1px solid var(--ln);margin:10px 0}
+.tl span{display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;text-align:center;padding:0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips i{font-style:normal;background:var(--acs);color:var(--ink);border-radius:5px;padding:2px 8px;font-size:.82rem}
+.flow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+.st{flex:1 0 170px;background:var(--sf);border:1px solid var(--ln);border-top:4px solid var(--ac);border-radius:6px;padding:10px;position:relative}
+.st b{display:block;margin-bottom:4px}
+.st.hot{border-top-color:var(--gd);background:var(--acs)}
+.st dl{margin:0;font-size:.82rem}.st dt{color:var(--mut)}.st dd{margin:0 0 4px}
+table{width:100%;border-collapse:collapse;background:var(--sf);border:1px solid var(--ln);font-size:.86rem}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{background:var(--acs)}
+.wrap{overflow-x:auto}
+.row{display:grid;grid-template-columns:1fr 24px 1.4fr 24px .6fr;gap:4px;align-items:stretch;margin-bottom:8px}
+.row .n{display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.cell{border:1px solid var(--ln);background:var(--sf);border-radius:6px;padding:8px;font-size:.86rem}
+.bz{border-left:5px solid var(--bz)}.sv{border-left:5px solid var(--sv)}.gd{border-left:5px solid var(--gd)}
+.ly{display:grid;grid-template-columns:200px 1fr;gap:6px;margin-bottom:6px}
+.ly .a{background:var(--ink);color:var(--bg);border-radius:6px;padding:8px;font-size:.86rem;font-weight:600}
+.ly .b{background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:8px;font-size:.84rem}
+.gov{margin-top:8px;border:2px dashed var(--ac);border-radius:8px;padding:8px;text-align:center;color:var(--ac);font-size:.86rem}
+.bar{display:flex;gap:8px;flex-wrap:wrap}.bar>div{flex:1 1 220px;border-radius:8px;padding:10px;background:var(--sf);border:1px solid var(--ln);border-top:5px solid var(--ac)}
+.bar ul,.box ul{margin:4px 0 0;padding-left:18px}
+.q{margin-bottom:8px}.q b{display:block}
+@media(max-width:640px){.ly{grid-template-columns:1fr}.row{grid-template-columns:1fr}.row .n{display:none}}
+@media print{nav{display:none}section{display:block!important;page-break-after:always}}
+details.deep{border:1px dashed var(--ln);border-radius:8px;margin-top:10px;background:var(--sf)}
+details.deep>summary{cursor:pointer;padding:9px 12px;font-weight:600;color:var(--ac)}
+details.deep>summary::after{content:" · only if asked";font-weight:400;color:var(--mut);font-size:.82rem}
+details.deep>.box,details.deep>.wrap{border:0;border-top:1px solid var(--ln);border-radius:0;margin:0}
+.core{border-left:4px solid var(--ac)}
+.sn{fill:var(--sf);stroke:var(--ln);stroke-width:1.2}.sf{fill:var(--acs);stroke:var(--ac);stroke-width:1.5}.sd{fill:none;stroke:var(--mut);stroke-dasharray:4 3}
+.sx{fill:var(--ink);font:12px system-ui,sans-serif}.sh{font-weight:700}.sm2{font-size:10.5px;fill:var(--mut)}
+.ln2{stroke:var(--mut);stroke-width:1.2}svg.dg{width:100%;max-width:720px;height:auto;display:block;margin:6px auto}
+</style></head><body>
+<header><h1>Enterprise data architecture: ED interview cheat sheet</h1>
+<p>Glance-and-go pages for a 45-minute discussion. <span class="tag" style="margin-left:0">Added</span> marks integrated interview concepts and practical modelling guidance. Collapsed “Deep dive” blocks are backup material: open them only if asked.</p></header>
+<nav><div role="tablist" id="tabs"></div></nav>
+<main>
+
+<section id="runsheet" data-t="1 Run sheet">
+<h2>Run sheet and opener</h2>
+<div class="box"><h3>Your one-line opener</h3>
+<p>“One trusted EBITDA across the portfolio companies in 90 days, on a data foundation that scales to every other use case without redesign. I run every engagement through the same six stages.”</p></div>
+<div class="tl" aria-label="45 minute timeline">
+<span style="flex:3;background:#0f6b73">Opener 3</span><span style="flex:10;background:#17233a">Framework 10</span><span style="flex:10;background:#6b4a9a">Architecture 10</span><span style="flex:7;background:#a35a00">Delivery 7</span><span style="flex:15;background:#3b7a3b">Discussion 15</span></div>
+<div class="g g2">
+<div class="box"><h3>Minutes 0-3: Opener</h3><p class="sm">Outcome first, then approach in one breath. Ask: “Framework or architecture first?”</p></div>
+<div class="box"><h3>Minutes 3-13: Six stages</h3><p class="sm">About 90 seconds each. For every stage say output, who, risk. Pause: “Want me to go deeper anywhere?”</p></div>
+<div class="box"><h3>Minutes 13-23: Architecture</h3><p class="sm">Conceptual in 2 minutes, logical in 6, physical in a few sentences. Pause after the logical view.</p></div>
+<div class="box add"><h3>Minutes 23-30: Delivery, value, risk<span class="tag">Added</span></h3><p class="sm">90-day plan, value KPIs, top risks, decision rights. This is what separates an ED from a lead architect.</p></div>
+<div class="box"><h3>Minutes 30-45: Discussion</h3><p class="sm">Protect this time. Use the challenge-questions page for tough ones.</p></div>
+<div class="box"><h3>Delivery rules</h3><ul class="sm"><li>Pattern first, project second.</li><li>Three things per topic: output, decision, risk.</li><li>Every section stands alone, so you can jump when interrupted.</li><li>Say the core lines. Keep “Deep dive” blocks closed unless the conversation goes there.</li></ul></div></div>
+</section>
+
+<section id="framework" data-t="2 Six stages">
+<h2>Six-stage discovery-to-delivery framework</h2>
+<p class="mut sm">Business before technology. The highlighted stage is the 90-day wedge.</p>
+<div class="flow">
+<div class="st"><b>1 Business context</b><dl><dt>Output</dt><dd>Revenue, cost, value-creation goals</dd><dt>Who</dt><dd>PE sponsor, CEO, CFO</dd><dt>Risk</dt><dd>Vague goals</dd></dl></div>
+<div class="st"><b>2 Stakeholders</b><dl><dt>Output</dt><dd>Stakeholder map, decision owners</dd><dt>Who</dt><dd>IC, CTO, CDO, business heads, compliance</dd><dt>Risk</dt><dd>No sponsor or owner</dd></dl></div>
+<div class="st"><b>3 Current state</b><dl><dt>Output</dt><dd>Top-down trace: decisions → reports → semantics → sources; DQ baseline</dd><dt>Who</dt><dd>Finance, source owners</dd><dt>Risk</dt><dd>Fixing too early; Excel adjustments</dd></dl></div>
+<div class="st"><b>4 Target conceptual</b><dl><dt>Output</dt><dd>Reusable patterns, five blocks, ADRs</dd><dt>Who</dt><dd>Principal architect, CDO</dd><dt>Risk</dt><dd>Technology before outcome</dd></dl></div>
+<div class="st hot"><b>5 Prioritization</b><dl><dt>Output</dt><dd>90 days: trusted EBITDA and P&amp;L. Year 1: shared foundations. Later: MDM and governance</dd><dt>Who</dt><dd>CFO, PE sponsor</dd><dt>Risk</dt><dd>Over-building</dd></dl></div>
+<div class="st"><b>6 Governance and operating model</b><dl><dt>Output</dt><dd>Hybrid central/federated, stewardship, SLAs, adoption tracking</dd><dt>Who</dt><dd>CDO, domain owners</dd><dt>Risk</dt><dd>KPI definition disputes</dd></dl></div></div>
+<div class="chips"><i>Value-creation levers</i><i>100-day plan</i><i>Quality of earnings (QoE)</i><i>Carve-out</i><i>Add-on acquisition</i><i>Decision rights</i><i>Data quality baseline</i></div>
+</section>
+
+<section id="conceptual" data-t="3 Conceptual to logical">
+<h2>Conceptual (5 blocks) to logical (9 layers) to medallion</h2>
+<div class="row" style="font-weight:600"><div>Conceptual block</div><div></div><div>Logical layers</div><div></div><div>Medallion</div></div>
+<div class="row"><div class="cell">1 Source systems</div><div class="n">→</div><div class="cell">L1 Source systems</div><div class="n">→</div><div class="cell">n/a</div></div>
+<div class="row"><div class="cell">2 Ingestion and integration</div><div class="n">→</div><div class="cell">L2 Connectivity and ingestion · L3 Raw data management</div><div class="n">→</div><div class="cell bz">Bronze</div></div>
+<div class="row"><div class="cell">3 Trusted enterprise data</div><div class="n">→</div><div class="cell">L4 Processing and refinement · L5 Trusted enterprise data (canonical, conformed)</div><div class="n">→</div><div class="cell sv">Silver</div></div>
+<div class="row"><div class="cell">4 Master and reference data</div><div class="n">⇢</div><div class="cell">L6 MDM and reference data (feeds L4, L5, L7)</div><div class="n">⇢</div><div class="cell sv">Silver and Gold</div></div>
+<div class="row"><div class="cell">5 Semantics and consumption</div><div class="n">→</div><div class="cell">L7 Data products · L8 Semantic and metrics · L9 Consumption</div><div class="n">→</div><div class="cell gd">Gold</div></div>
+<div class="gov">Cross-cutting: governance · security · data quality · lineage · metadata · observability · audit</div>
+<div class="box add" style="margin-top:10px"><h3>Mnemonic<span class="tag">Added placement</span></h3>
+<p><b>SOURCE → INGEST → STORE → REFINE → STANDARDIZE → PUBLISH → DEFINE → CONSUME</b></p>
+<p class="sm mut">Placement of canonical models in Silver and dimensional models in Gold is a design choice. Be ready to defend the boundary: Silver integrates, Gold serves analytics.</p></div>
+<details class="deep"><summary>Deep dive: where dimensional modelling fits</summary><div class="box add" style="margin-top:10px"><h3>Where dimensional modelling fits<span class="tag">Added</span></h3>
+<p><b>Silver = enterprise integration model.</b> Standardized canonical entities, identifiers, relationships, source mappings and conformed attributes. It may be normalized or otherwise structured for integration and reuse.</p>
+<p><b>Gold = analytical consumption model.</b> Publish business-process-oriented fact and dimension tables, commonly as star schemas/data marts, with agreed grain and reusable conformed dimensions.</p>
+<p class="sm mut">Do not treat “conformed dimension” and “dimensional model” as synonyms: a conformed dimension is a shared business definition; the Gold star schema is the analytical structure that uses it. SCD processing can occur wherever the dimension is maintained.</p></div></details>
+</section>
+
+<section id="logical" data-t="4 Logical patterns">
+<h2>Logical architecture with pattern callouts</h2>
+<div class="ly"><div class="a">L1 Sources</div><div class="b">ERP/GL, CRM, OMS/EMS, trading, billing, market feeds, Excel. Capture owner, entities, volume, refresh, integration options.</div></div>
+<div class="ly"><div class="a">L2 Ingestion</div><div class="b">Batch · CDC · API · streaming · events · files · document OCR. Choose by capability, volume, latency. No business logic here.</div></div>
+<div class="ly"><div class="a">L3 Raw (Bronze)</div><div class="b">Immutable source copy, schema history, ingestion timestamp, provenance. Enables replay and audit.</div></div>
+<div class="ly"><div class="a">L4 Refinement (Silver)</div><div class="b">Validate, cleanse, deduplicate, standardize, reconcile. Mappings: source→enterprise CoA, cost center, legal entity, customer ID, currency, period. Effective-dated and versioned.</div></div>
+<div class="ly"><div class="a">L5 Trusted data</div><div class="b">Canonical models, conformed definitions (maintained in Silver/MDM, consumed by Gold stars), data contracts. SCD Type 1 and 2 for change history.</div></div>
+<div class="ly"><div class="a">L6 MDM and reference</div><div class="b">Match, golden record, attribute-level survivorship, hierarchies, stewardship, cross-reference. Start with legal entity, CoA, cost center, currency, period.</div></div>
+<div class="ly" style="--x:1"><div class="a" style="background:var(--ad);color:#fff">Consolidation and close<br>Added</div><div class="b add">Intercompany eliminations, FX translation, approved manual adjustments, reconciliation to the audited GL, finance sign-off. This is what makes EBITDA trusted.</div></div>
+<div class="ly"><div class="a">L7 Data products (Gold)</div><div class="b">Financial, customer, trading, subscription, operational. Owner, contract, versioning, quality SLA, access policy, lineage.</div></div>
+<div class="box core" style="margin-top:10px"><h3>Gold star schema: the one visual to draw</h3>
+<p class="sm">Core line: “Silver integrates, Gold serves analytics, and I declare the grain first.”</p>
+<svg class="dg" viewBox="0 0 720 340" role="img" aria-label="Star schema: Fact GL transaction surrounded by Date, Company, Legal Entity, Account, Cost Center and Currency dimensions, with optional Customer and Product">
+<g class="ln2"><line x1="170" y1="55" x2="260" y2="135"/><line x1="170" y1="155" x2="260" y2="175"/><line x1="170" y1="255" x2="260" y2="215"/><line x1="550" y1="55" x2="460" y2="135"/><line x1="550" y1="155" x2="460" y2="175"/><line x1="550" y1="255" x2="460" y2="215"/></g>
+<g class="sd"><line x1="310" y1="260" x2="310" y2="288"/><line x1="410" y1="260" x2="410" y2="288"/></g>
+<rect class="sf" x="260" y="90" width="200" height="170" rx="8"/>
+<text class="sx sh" x="360" y="114" text-anchor="middle">Fact_GL_Transaction</text>
+<text class="sx sm2" x="360" y="134" text-anchor="middle">Grain: one posted GL journal line</text>
+<text class="sx" x="360" y="160" text-anchor="middle">Debit · Credit</text><text class="sx" x="360" y="180" text-anchor="middle">Signed local amount</text><text class="sx" x="360" y="200" text-anchor="middle">Reporting-currency amount</text>
+<text class="sx sm2" x="360" y="230" text-anchor="middle">Journal no. = degenerate dimension</text>
+<g><rect class="sn" x="20" y="30" width="150" height="50" rx="6"/><text class="sx" x="95" y="60" text-anchor="middle">Dim_Date</text>
+<rect class="sn" x="20" y="130" width="150" height="50" rx="6"/><text class="sx" x="95" y="160" text-anchor="middle">Dim_Company</text>
+<rect class="sn" x="20" y="230" width="150" height="50" rx="6"/><text class="sx" x="95" y="260" text-anchor="middle">Dim_Legal_Entity</text>
+<rect class="sn" x="550" y="30" width="150" height="50" rx="6"/><text class="sx" x="625" y="55" text-anchor="middle">Dim_Account</text><text class="sx sm2" x="625" y="71" text-anchor="middle">local CoA → enterprise CoA</text>
+<rect class="sn" x="550" y="130" width="150" height="50" rx="6"/><text class="sx" x="625" y="160" text-anchor="middle">Dim_Cost_Center</text>
+<rect class="sn" x="550" y="230" width="150" height="50" rx="6"/><text class="sx" x="625" y="260" text-anchor="middle">Dim_Currency</text></g>
+<g><rect class="sn" x="260" y="288" width="100" height="40" rx="6" stroke-dasharray="4 3"/><text class="sx" x="310" y="313" text-anchor="middle">Dim_Customer</text>
+<rect class="sn" x="360" y="288" width="100" height="40" rx="6" stroke-dasharray="4 3"/><text class="sx" x="410" y="313" text-anchor="middle">Dim_Product</text></g>
+</svg>
+<p class="sm mut">Balances, budget, forecast and intercompany are separate facts at their own grain. They share the same conformed dimensions. Aggregate to a common grain before combining.</p></div>
+<details class="deep"><summary>Deep dive: Gold facts, dimensions and grain</summary><div class="box add" style="margin:8px 0"><h3>Gold analytical modelling: facts, dimensions and grain<span class="tag">Added</span></h3>
+<ul class="sm">
+<li><b>Start with the business process and grain.</b> State exactly what one fact row represents before choosing keys or measures. Example: one row per posted GL journal line.</li>
+<li><b>Fact tables</b> hold measurable events or states and foreign keys to dimensions. Types: transaction, periodic snapshot (e.g. month-end account balance), accumulating snapshot (e.g. close workflow), and factless fact (e.g. eligibility/coverage).</li>
+<li><b>Dimension tables</b> describe who/what/where/when/how: Date, Company, Legal Entity, Account, Cost Center, Currency, Customer, Product. Use surrogate keys; retain source/natural keys as business identifiers.</li>
+<li><b>Star schema</b> is the default analytical pattern: dimensions filter/group facts. Snowflake dimensions normalize subdimensions where justified, but add joins and complexity.</li>
+<li><b>Conformed dimensions</b> share the same business meaning, keys/mappings and hierarchies across subject areas and facts. Use a Kimball bus matrix to plan which dimensions are shared by which business processes.</li>
+<li><b>Other patterns:</b> role-playing dimensions (Order Date / Posting Date), degenerate dimensions (document number), junk dimensions (small flags), bridge tables (many-to-many), and hierarchy/parent-child dimensions.</li>
+<li><b>Measures:</b> additive (debit/credit amounts), semi-additive (account balances across time), non-additive (ratios/percentages). Calculate ratios from additive components rather than summing them.</li>
+</ul></div></details>
+<details class="deep"><summary>Deep dive: financial model example</summary><div class="box add" style="margin:8px 0"><h3>Financial model example<span class="tag">Added</span></h3>
+<p class="sm"><b>Fact_GL_Transaction</b> — grain: one posted GL journal line. Dimension keys: Date, Company, Legal Entity, Account, Cost Center, Currency (plus relevant Customer/Product). Measures: debit, credit, signed local amount, reporting-currency amount. Journal/document number can be a degenerate dimension.</p>
+<p class="sm"><b>Separate facts at separate grains:</b> Fact_Monthly_Account_Balance (one account/entity/currency/period), Fact_Budget (budget line/period), Fact_Forecast, Fact_Intercompany_Transaction and an FX rate reference table (date/currency-pair grain). Never join facts of different grains directly and assume the result is valid; aggregate each to a conformed dimensional grain first.</p>
+<p class="sm"><b>Finance dimensions:</b> Dim_Date, Dim_Company, Dim_Legal_Entity, Dim_Account (local CoA mapped to enterprise CoA), Dim_Cost_Center, Dim_Currency, Dim_Customer and Dim_Product. Preserve local account codes and effective-dated mappings.</p></div></details>
+<details class="deep"><summary>Deep dive: SCD and late-arriving data</summary><div class="box add" style="margin:8px 0"><h3>Dimension history and late-arriving data<span class="tag">Added</span></h3>
+<ul class="sm"><li><b>SCD 0:</b> retain original; <b>Type 1:</b> overwrite correction; <b>Type 2:</b> new surrogate-key row with effective-from, effective-to and current flag; <b>Type 3:</b> retain limited prior value. Prioritize Types 1 and 2.</li>
+<li>For Type 2, facts resolve the dimension surrogate key valid at the fact event date. Define treatment for late-arriving dimensions, inferred/unknown members, early-arriving facts, retroactive corrections and backfills.</li>
+<li>Keep auditability: source system/key, effective dates, load timestamps, change reason and mapping version where required.</li></ul></div></details>
+<div class="ly"><div class="a">L8 Semantic and metrics</div><div class="b">Glossary, governed KPIs (Revenue, Opex, EBITDA, P&amp;L), hierarchies, calculation rules, company and consolidated views.</div></div>
+<div class="ly"><div class="a">L9 Consumption</div><div class="b">CFO dashboards, financial reporting, BI, data science, AI/ML. <span class="mut">Added:</span> governed AI use cases such as variance commentary, forecasting, anomaly detection.</div></div>
+<div class="gov">Governance · security · metadata · lineage · data quality · orchestration · observability · audit</div>
+</section>
+
+<section id="physical" data-t="5 Physical">
+<h2>Physical: layer to service map</h2>
+<div class="box core" style="margin-bottom:10px"><b>Diagrams:</b> Azure landing zone, hub-spoke network, end-to-end data platform and Gold star schema are in <i>azure-enterprise-data-platform.drawio</i> (4 pages). Open the matching page when asked to “draw it”.</div><p class="mut sm">Cap this at 2-3 minutes. Lead with “platform choice follows client context”.</p>
+<div class="wrap"><table><tr><th>Layer</th><th>Azure reference</th><th>Alternatives<span class="tag">Added</span></th></tr>
+<tr><td>Ingestion</td><td>ADF, Databricks ingestion, Event Hubs, CDC</td><td>AWS DMS/Glue/Kinesis; Snowpipe</td></tr>
+<tr><td>Raw / Bronze</td><td>ADLS Gen2 + Delta Lake</td><td>S3 + Delta/Iceberg; Snowflake tables</td></tr>
+<tr><td>Refinement / Silver</td><td>Databricks jobs, Delta pipelines</td><td>Glue/EMR; dbt on Snowflake</td></tr>
+<tr><td>Gold and catalog</td><td>Delta + Unity Catalog, Databricks SQL</td><td>Lake Formation; Snowflake Horizon</td></tr>
+<tr><td>MDM</td><td>Packaged MDM (buy, do not build)</td><td>Same options across clouds</td></tr>
+<tr><td>Semantic</td><td>Power BI semantic model (modelling detail in the deep dive below)</td><td>dbt semantic layer, Looker, AtScale</td></tr>
+<tr><td>Enterprise governance</td><td>Microsoft Purview + Unity Catalog</td><td>Collibra, Alation</td></tr>
+<tr><td>Cloud foundation</td><td>CAF + Azure Landing Zones, Entra ID, Key Vault, Private Link, Terraform/Bicep</td><td>AWS Control Tower; GCP landing zone</td></tr></table></div>
+<details class="deep"><summary>Deep dive: Power BI modelling and query mode</summary><div class="box add" style="margin-top:10px"><h3>Power BI modelling and query mode<span class="tag">Added</span></h3>
+<ul class="sm"><li>Prefer a well-designed star schema with one-to-many dimension-to-fact relationships and single-direction filtering by default. Use bidirectional or many-to-many relationships only with a clear requirement and tested filter behavior.</li>
+<li>Use role-playing dates with active/inactive relationships where appropriate; use explicit DAX measures for governed calculations and calculated columns only when row-level attributes are needed.</li>
+<li><b>Import</b> generally gives strong interactive performance; <b>DirectQuery</b> queries the source and depends on source concurrency/latency; <b>composite</b> mixes storage modes; <b>Direct Lake</b> can be considered in a suitable Fabric architecture. Choose from freshness, scale, latency, concurrency, governance and cost requirements—not user count alone.</li>
+<li>Use incremental refresh and aggregation tables for large facts where appropriate. Reuse certified semantic models; apply RLS/OLS and test security paths.</li>
+<li>Keep business definitions in governed measures/semantic models. CFO and finance owners must approve the EBITDA calculation, adjustment policy and reporting currency rules.</li></ul></div></details>
+<h3 style="margin-top:12px">Choosing the engine<span class="tag">Added</span></h3>
+<div class="g g3">
+<div class="box"><b>Databricks</b><p class="sm">Heavy engineering, Spark, ML, multi-cloud, open formats.</p></div>
+<div class="box"><b>Fabric</b><p class="sm">Microsoft-centric estate, Power BI first, SaaS operations, quicker start.</p></div>
+<div class="box"><b>Snowflake</b><p class="sm">SQL-centric teams, low platform operations, strong sharing.</p></div></div>
+<p class="sm mut">Decide on: existing estate, skills, workload mix, cost model, time-to-value, lock-in. For the first 90 days use a thin slice (one workload subscription, minimal guardrails), then harden the landing zone in year 1.</p>
+</section>
+
+<section id="delivery" data-t="6 Delivery, value, risk">
+<h2>Delivery, value and risk<span class="tag">Added</span></h2>
+<div class="bar">
+<div><h3>0-90 days</h3><ul class="sm"><li>Minimum financial master and reference data</li><li>Trusted revenue and expense data</li><li>Governed EBITDA and P&amp;L</li></ul></div>
+<div><h3>Year 1</h3><ul class="sm"><li>Shared ingestion and modelling patterns</li><li>Common data foundations</li><li>Onboard next domains</li></ul></div>
+<div><h3>Later</h3><ul class="sm"><li>Full MDM and governance expansion</li><li>Customer, trading, AI use cases</li></ul></div></div>
+<div class="g g2" style="margin-top:10px">
+<div class="box"><h3>Value KPIs</h3><ul class="sm"><li>Close cycle days</li><li>Manual adjustments eliminated</li><li>Reconciliation breaks to GL</li><li>Time to onboard an acquisition</li><li>Report adoption and platform run cost</li></ul></div>
+<div class="box"><h3>Decision rights (adapt to client)</h3><ul class="sm"><li>Fact grain, metric definitions and dimensional conformance: domain data owner + enterprise architecture</li><li>EBITDA definition: CFO signs off</li><li>CoA and cost center mapping: finance controllers, stewarded by data office</li><li>Data products: domain owners</li><li>Platform standards: central architecture</li><li>Conflicts: data council, escalate to CFO/CDO</li></ul></div></div>
+<div class="wrap" style="margin-top:10px"><table><tr><th>Failure mode</th><th>Mitigation</th></tr>
+<tr><td>KPI definitions disputed across companies</td><td>Agree EBITDA definition with CFO before build; version it</td></tr>
+<tr><td>Excel adjustments bypass the platform</td><td>Governed adjustment layer with approval and audit trail</td></tr>
+<tr><td>Source owners will not cooperate</td><td>Sponsor-backed data contracts and SLAs</td></tr>
+<tr><td>Over-building before first outcome</td><td>90-day wedge, defer MDM breadth</td></tr>
+<tr><td>Weak sponsorship</td><td>Monthly CFO/PE review of value KPIs</td></tr></table></div>
+<div class="g g2" style="margin-top:10px">
+<div class="box add"><h3>Running 6-7 engagements in parallel<span class="tag">Added</span></h3><ul class="sm"><li>Same six-stage playbook and reusable accelerators (connectors, mapping templates, canonical models, DQ rules, ADRs, dashboards).</li><li>Each engagement has a lead architect and a delivery lead. I own the sponsor relationship and quality gates.</li><li>Weekly portfolio review: value KPIs, risks, staffing, escalations.</li><li>Step in on decisions (scope, conflict, risk), not daily design.</li></ul></div>
+<div class="box add"><h3>Engagement shape and team (adapt)<span class="tag">Added</span></h3><ul class="sm"><li>Phase 1: fixed 90-day outcome. Later phases gated on value KPIs, with change control.</li><li>Typical pod: engagement lead, principal architect, 2-3 data engineers, finance SME/analyst, BI developer, PM.</li><li>Reuse lowers effort per engagement and protects margin.</li><li>Effort and price ranges: confirm against firm norms.</li></ul></div>
+<div class="box add"><h3>Regulated data and security<span class="tag">Added</span></h3><ul class="sm"><li>Data residency, classification, masking, retention, access logging and audit evidence by design.</li><li>Policy guardrails at landing zone level; data-level controls in Unity Catalog.</li><li>Confirm exact regulatory requirements with the client’s compliance team. Do not assume them.</li></ul></div>
+<div class="box add"><h3>AI-ready foundation<span class="tag">Added</span></h3><ul class="sm"><li>Certified Gold data, governed semantic definitions and lineage are the prerequisites.</li><li>Start with low-risk use cases: variance commentary, forecasting, anomaly detection, with human review.</li><li>Control what AI can see: same access policies as BI.</li></ul></div></div>
+</section>
+
+<section id="terms" data-t="7 Terminology"><h2>Terminology cheat sheet</h2><h3>Must know (10)</h3><div class="wrap"><table><tr><th>Term</th><th>One line</th></tr><tr><td>Canonical model</td><td>One standard representation of an entity across differing source structures.</td></tr><tr><td>Conformed dimension</td><td>Dimension shared with identical meaning across facts and data marts.</td></tr><tr><td>MDM vs reference data</td><td>MDM resolves identity of business entities (golden record). Reference data is controlled value lists such as currency and period.</td></tr><tr><td>Data product vs data mart</td><td>A product has an owner, contract, SLA and access policy. A mart is just a modelled dataset.</td></tr><tr><td>Grain</td><td>What one row of a fact table represents, such as one GL journal line.</td></tr><tr><td>Star schema</td><td>Fact table(s) surrounded by denormalized descriptive dimensions for analytics.</td></tr><tr><td>SCD Type 1 / 2</td><td>Overwrite vs keep history of dimension changes.</td></tr><tr><td>Medallion</td><td>Bronze raw, Silver validated, Gold curated.</td></tr><tr><td>Data contract</td><td>Agreed schema, quality and delivery terms between producer and consumer.</td></tr><tr><td>Lineage</td><td>Trace from a reported number back to source transactions and rules.</td></tr></table></div><details class="deep"><summary>Deep dive: 19 more terms</summary><div class="wrap"><table><tr><th>Term</th><th>One line</th></tr><tr><td>Golden record</td><td>Best single version of an entity after matching and survivorship.</td></tr><tr><td>Survivorship</td><td>Rules choosing which source value wins per attribute.</td></tr><tr><td>Fact table</td><td>Business event or state at a declared grain; contains dimension keys and measures.</td></tr><tr><td>Dimension table</td><td>Descriptive business context used to filter, group and label facts.</td></tr><tr><td>Snowflake schema</td><td>Normalized dimension structure; can reduce redundancy but introduces joins.</td></tr><tr><td>Surrogate key</td><td>Warehouse-generated key that identifies a dimension row/version independently of source keys.</td></tr><tr><td>Kimball bus matrix</td><td>Planning matrix mapping business processes/facts to shared conformed dimensions.</td></tr><tr><td>Role-playing dimension</td><td>One dimension used in multiple roles, such as order date and posting date.</td></tr><tr><td>Degenerate dimension</td><td>Business identifier stored on the fact, such as journal/document number, without a separate dimension.</td></tr><tr><td>Bridge table</td><td>Resolves many-to-many relationships between facts and dimensions or between dimension members.</td></tr><tr><td>Additive measure</td><td>Can be summed across all dimensions; e.g. transaction amount.</td></tr><tr><td>Semi-additive measure</td><td>Can be summed across some dimensions but not time; e.g. account balance.</td></tr><tr><td>Data Vault</td><td>Historized integration pattern using Hubs, Links and Satellites; not a substitute for a consumption star schema.</td></tr><tr><td>Import / DirectQuery / Direct Lake</td><td>Power BI storage/query modes with different freshness, performance and platform constraints.</td></tr><tr><td>CDC</td><td>Capturing incremental database changes.</td></tr><tr><td>Semantic layer</td><td>Governed business meaning: measures, hierarchies, calculation rules.</td></tr><tr><td>Federated governance</td><td>Central guardrails with domain-level ownership.</td></tr><tr><td>ADR</td><td>Architecture decision record: decision, options, trade-offs.</td></tr><tr><td>Landing zone</td><td>Governed cloud foundation: identity, network, policy, management.</td></tr></table></div></details></section>
+
+<section id="challenges" data-t="8 Challenge questions"><h2>Challenge questions<span class="tag">Added</span></h2><h3>Core: architecture and trust</h3><div class="box q"><b>How do you prove EBITDA is trusted?</b>Reconcile to the audited GL, show lineage from reported number to source, govern the definition, and have finance sign off each period.</div><div class="box q"><b>Why not buy a consolidation tool?</b>Often right for statutory consolidation. The foundation still matters because management reporting, KPIs and later analytics need the same trusted data. I would integrate, not duplicate.</div><div class="box q"><b>What if the companies refuse a common chart of accounts?</b>Keep local CoAs, map them to an enterprise CoA with effective-dated mappings, and converge over time.</div><div class="box q"><b>How do you stop this becoming a multi-year program?</b>Ship the 90-day wedge, measure value KPIs, and fund the next domain only on proven outcomes.</div><div class="box q"><b>Central or federated?</b>Central guardrails, platform and standards; federated domain ownership of data products and quality.</div><div class="box q"><b>An acquisition lands mid-project?</b>Reuse source onboarding, mappings and the conformed model so onboarding is configuration, not redesign.</div><div class="box q"><b>Why this platform?</b>Context decides: existing estate, skills, workload mix, cost, time-to-value. The patterns hold on any platform.</div><h3 style="margin-top:14px">Core: leadership and commercial <span class="tag">Added</span></h3><div class="box q"><b>How do you run 6-7 engagements in parallel?</b>One playbook and reusable accelerators, a lead architect and delivery lead per engagement, a weekly portfolio review of value KPIs, risks and staffing. I own sponsor relationships and quality gates, and step in on decisions.</div><div class="box q"><b>The CFO wants results in 30 days and the CTO wants the platform first. What do you do?</b>Offer a thin slice: one workload, trusted EBITDA first, platform hardening in parallel. Agree decision rights up front and show both sponsors the same value KPIs.</div><div class="box q"><b>How do you handle a controller who defends their Excel process?</b>Learn what the spreadsheet solves, keep the logic as governed adjustments with approval and audit trail, show time saved, and get the CFO to sponsor the change.</div><div class="box q"><b>How do you protect scope and margin?</b>Fixed 90-day outcome, change control, phase funding gated on value KPIs, and accelerators to cut effort. Pricing and staffing follow firm norms.</div><div class="box q"><b>What does “AI-ready” mean here?</b>Certified Gold data, governed semantics, lineage and the same access policies as BI. Start with variance commentary and forecasting, with human review.</div><div class="box q"><b>How do you handle regulated data?</b>Residency, classification, masking, retention and audit evidence by design. Confirm specific regulator requirements with the client’s compliance team.</div><details class="deep"><summary>Deep dive: modelling questions</summary><div class="box q"><b>How do you design the financial dimensional model?</b>Start with the process and grain: one GL journal line per fact row. Add conformed Date, Company, Legal Entity, Account, Cost Center and Currency dimensions. Keep balances, budgets and forecasts in separate facts at their own grains.</div><div class="box q"><b>Why not put the star schema in Silver?</b>Silver is the integrated, standardized enterprise representation; Gold is shaped for analytical consumption. The boundary is a design choice, but keep canonical integration concerns separate from business-process facts and dimensions.</div><div class="box q"><b>How do you handle chart-of-accounts differences?</b>Preserve local CoA identifiers, map to an enterprise account dimension using effective-dated mappings, retain lineage and steward mapping exceptions.</div><div class="box q"><b>How do you implement SCD Type 2?</b>Detect tracked attribute changes, expire the current row, insert a new surrogate-key version with effective dates/current flag, and resolve each fact to the version valid on its event date. Define late-arriving and retroactive correction handling.</div><div class="box q"><b>How do you prevent double counting across facts?</b>Declare and document each fact's grain. Aggregate facts independently to a common conformed dimensional grain before combining measures; never join transaction facts to periodic snapshots naively.</div><div class="box q"><b>How do you choose Import vs DirectQuery in Power BI?</b>Assess freshness, query latency, concurrency, source capacity, model size, governance and cost. Prefer Import when refresh latency is acceptable; use DirectQuery/composite/Direct Lake only when requirements and platform capabilities justify them.</div></details></section>
+<section id="discovery" data-t="9 Discovery SOLVE">
+<h2>30-minute discovery: SOLVE<span class="tag">Added</span></h2>
+<p class="mut sm">15 questions, 5 blocks, 3 each. Business first, technology last. Ask each company separately, then compare. If time runs short, drop V and keep S and O.</p>
+<div class="tl" aria-label="30 minute discovery timeline"><span style="flex:5;background:#0f6b73">S 5</span><span style="flex:7;background:#17233a">O 7</span><span style="flex:8;background:#6b4a9a">L 8</span><span style="flex:6;background:#a35a00">V 6</span><span style="flex:4;background:#3b7a3b">E 4</span></div>
+<div class="g g2">
+<div class="box core"><h3>S: Strategy (why?)</h3><ul class="sm"><li><b>Decision:</b> What one decision or report must the CFO and sponsor trust within 90 days?</li><li><b>Thesis:</b> What is the investment thesis and hold period?</li><li><b>Add-ons:</b> Are more acquisitions planned, and how fast must they onboard?</li></ul><p class="sm mut">Decides: the 90-day wedge and how reusable the design must be.</p></div>
+<div class="box core"><h3>O: Official numbers (what must be trusted?)</h3><ul class="sm"><li><b>Close:</b> How long does the monthly close take, and where does it hurt?</li><li><b>EBITDA:</b> How is it defined in each company, and where do manual adjustments live?</li><li><b>Chart:</b> Do the companies share a chart of accounts, entities, currencies and calendar?</li></ul><p class="sm mut">Decides: mapping and consolidation scope, and the need for a governed adjustment layer.</p></div>
+<div class="box core"><h3>L: Landscape (where is the data?)</h3><ul class="sm"><li><b>Systems:</b> Which systems feed finance, who owns them, and do customer and entity IDs match?</li><li><b>Access:</b> Can we extract by API, database, files or CDC?</li><li><b>Sensitivity:</b> What data is regulated or has residency rules?</li></ul><p class="sm mut">Decides: ingestion patterns, MDM scope and security constraints.</p></div>
+<div class="box core"><h3>V: Vehicle (how will we build it?)</h3><ul class="sm"><li><b>Stack:</b> What cloud, data platform and BI tools exist today?</li><li><b>Skills:</b> What skills does the team have, and is there a buy-vs-build preference?</li><li><b>Autonomy:</b> Do the companies stay independent, or does everything centralize?</li></ul><p class="sm mut">Decides: platform choice and central vs federated governance.</p></div>
+<div class="box core"><h3>E: Execution (who and when?)</h3><ul class="sm"><li><b>Owner:</b> Who signs off the EBITDA definition and owns each source?</li><li><b>Blockers:</b> What could stop us in the first 30 days (access, approvals, people, licences)?</li><li><b>Measure:</b> How will we measure success (close days, adjustments removed, onboarding time)?</li></ul><p class="sm mut">Decides: decision rights, risks and value KPIs.</p></div>
+<div class="box"><h3>One-word recall</h3><p class="sm">Decision · Thesis · Add-ons<br>Close · EBITDA · Chart<br>Systems · Access · Sensitivity<br>Stack · Skills · Autonomy<br>Owner · Blockers · Measure</p><p class="sm mut">S and O are business, L is data, V is technology, E is delivery.</p></div></div>
+<h3 style="margin-top:12px">What you hear → quick solution</h3>
+<div class="wrap"><table><tr><th>If you hear</th><th>Then propose</th></tr>
+<tr><td>Different EBITDA definitions</td><td>One governed definition agreed with the CFO before build</td></tr>
+<tr><td>Different charts of accounts</td><td>Effective-dated mapping to an enterprise CoA, not a forced merge</td></tr>
+<tr><td>Heavy Excel adjustments</td><td>Governed adjustment layer with approval and audit trail</td></tr>
+<tr><td>Microsoft-centric estate</td><td>Azure landing zone, Fabric or Databricks, Power BI</td></tr>
+<tr><td>Few sources, SQL skills</td><td>Thin slice: ADF + lakehouse + one semantic model</td></tr>
+<tr><td>More acquisitions planned</td><td>Reusable onboarding pattern and shared conformed model</td></tr>
+<tr><td>Regulated data</td><td>Policy guardrails and access controls in the first slice</td></tr></table></div>
+<div class="box core" style="margin-top:10px"><h3>Closing line (last minute)</h3><p>“From this, I’d propose a 90-day slice: <b>[Decision]</b> on <b>[Stack]</b>, with <b>[Owner]</b> signing off the definitions. Does that match your priorities?”</p></div>
+</section>
+<section id='builder' data-t='10 Solution builder'>
+<style>.opt{display:block;width:100%;text-align:left;margin-top:6px;padding:7px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;font-size:.86rem;cursor:pointer}.opt[aria-pressed='true']{background:var(--ac);color:var(--bg);border-color:var(--ac)}.opt:focus-visible,.act:focus-visible{outline:2px solid var(--ac);outline-offset:2px}.act{margin:6px 6px 0 0;padding:6px 12px;border:1px solid var(--ln);border-radius:6px;background:var(--sf);color:var(--ink);font:inherit;cursor:pointer}.prog{height:6px;background:var(--ln);border-radius:3px;overflow:hidden;margin:6px 0}.prog i{display:block;height:100%;background:var(--ac)}#sb-out h3{margin-top:10px}#sb-out ul{margin:4px 0 0;padding-left:18px}.qh{font-size:.75rem;color:var(--mut)}</style>
+<h2>Solution builder<span class='tag'>Added</span></h2>
+<p class='mut sm'>Pick the closest answer for each question. The statement below updates as you go. It is rule-based, so use it as a drill and rewrite the wording in your own words.</p>
+<div class='box core' id='sb-out' aria-live='polite'></div>
+<div class='g g2' id='sb-q' style='margin-top:10px'></div>
+</section>
+</main>
+<script>
+(function(){
+var secs=[].slice.call(document.querySelectorAll("section")),tabs=document.getElementById("tabs");
+secs.forEach(function(s){var b=document.createElement("button");b.textContent=s.dataset.t;b.setAttribute("role","tab");b.dataset.id=s.id;
+b.onclick=function(){show(s.id);try{location.hash=s.id}catch(e){}};tabs.appendChild(b)});
+function show(id){var ok=secs.some(function(s){return s.id===id});if(!ok)id=secs[0].id;
+secs.forEach(function(s){s.classList.toggle("on",s.id===id)});
+[].forEach.call(tabs.children,function(b){b.setAttribute("aria-selected",b.dataset.id===id)});window.scrollTo(0,0)}
+window.addEventListener("hashchange",function(){show(location.hash.slice(1))});
+show(location.hash.slice(1));
+})();
+</script>
+<script>window.addEventListener('beforeprint',function(){[].forEach.call(document.querySelectorAll('details'),function(d){d.open=true})});</script><script>
+(function(){
+var Q=[['S','Decision','What one decision or report must the CFO and sponsor trust within 90 days?',['Trusted group EBITDA and P&L','Faster monthly close and board reporting','Cash and working-capital visibility']],
+['S','Thesis','What is the investment thesis and hold period?',['Short hold: fast visible wins','Standard 3-5 year hold','Exit preparation: diligence-ready data']],
+['S','Add-ons','Are more acquisitions planned, and how fast must they onboard?',['Yes, frequent and fast','Possible, not planned','No further acquisitions']],
+['O','Close','How long does the monthly close take, and where does it hurt?',['Slow: 10+ working days','Moderate: 5-10 days','Fast but manual and uncontrolled']],
+['O','EBITDA','How is EBITDA defined, and where do adjustments live?',['One agreed definition','Definition differs per company','Adjustments live in Excel']],
+['O','Chart','Do the companies share a chart of accounts, entities, currencies and calendar?',['Shared','Different per company','Partly aligned']],
+['L','Systems','Which systems feed finance, and do customer and entity IDs match?',['Few ERPs, IDs match','Several ERPs, IDs differ','Many systems incl. legacy and Excel']],
+['L','Access','Can we extract by API, database, files or CDC?',['API or database access','Files and exports only','Mixed, some restricted']],
+['L','Sensitivity','What data is regulated or has residency rules?',['Regulated, with residency rules','Sensitive, no residency rules','Low sensitivity']],
+['V','Stack','What cloud, data platform and BI tools exist today?',['Azure + Databricks','Azure + Fabric / Power BI','AWS, Snowflake or other','No platform yet']],
+['V','Skills','What skills does the team have, and is there a buy-vs-build preference?',['Strong SQL/BI, limited engineering','Strong engineering team','Limited capacity: partner-led']],
+['V','Autonomy','Do the companies stay independent, or does everything centralize?',['Centralize','Federated: companies keep ownership','Hybrid']],
+['E','Owner','Who signs off the EBITDA definition and owns each source?',['Group CFO','Group Controller / FP&A head','No clear owner yet']],
+['E','Blockers','What could stop us in the first 30 days?',['Source access and approvals','Skills and capacity','Stakeholder alignment']],
+['E','Measure','How will we measure success?',['Close cycle days','Manual adjustments removed','Time to onboard an acquisition']]];
+var DEC=['one governed, reconciled EBITDA and P&L across the companies','a faster, controlled monthly close with a board reporting pack','weekly cash and working-capital visibility across the companies'];
+var STK=['your Azure estate with Databricks and Power BI','your Azure estate with Microsoft Fabric and Power BI','your existing platform (AWS, Snowflake or other), using the same patterns','a new thin-slice platform, chosen on skills, cost and time-to-value'];
+var OWN=['the Group CFO','the Group Controller','a named finance owner we agree in week one'];
+var DES={1:['Prioritize the fastest visible win and defer full MDM.','Phase the foundations across year 1 and keep the model conformed.','Make lineage, reconciliation and sign-off diligence-ready.'],
+2:['Build a reusable onboarding pattern (connector, mapping template, DQ rules) so an add-on is configuration, not redesign.','Keep the model conformed so a later add-on can be onboarded without redesign.','Optimize for the current companies first.'],
+3:['Target the close: automate extraction, reconciliation and sign-off to cut days.','Protect the current close and add reconciliation checks and controls.','Automate the manual steps first. The numbers are timely but not controlled.'],
+4:['Keep the agreed EBITDA definition versioned in the semantic layer.','Agree one group EBITDA definition with the CFO before build. Show company-specific bridges.','Replace Excel adjustments with a governed adjustment layer (approval and audit trail).'],
+5:['Use the shared chart of accounts as the enterprise CoA, with company and entity dimensions.','Map local charts of accounts to an enterprise CoA with effective-dated mappings. Do not force a merge.','Align the overlapping accounts, map the rest and track the exceptions.'],
+6:['Use direct ingestion and a thin conformed model.','Add MDM for customer and legal entity: golden IDs and a crosswalk.','Prioritize the finance sources first. Defer the long tail and Excel sources.'],
+7:['Use API/CDC ingestion with data contracts.','Plan file-based landing with contracts and checks. Push for CDC or API later.','Resolve access approvals in week one and use the quickest feasible pattern per source.'],
+8:['Put policy guardrails, residency and access controls in the first slice (landing zone, Unity Catalog, audit evidence).','Classify and mask sensitive fields and log access.','Apply standard controls and revisit as use cases grow.'],
+10:['Use SQL/BI-friendly patterns (managed pipelines, semantic model) and upskill on engineering.','Build on code-first pipelines with CI/CD and testing.','Run a partner-led build with a transition plan to client ownership.'],
+11:['Central platform and standards, with central ownership of data products.','Central guardrails. Companies own Bronze contracts, Silver mappings and Gold products.','Central finance data products. Domain ownership for operational data.']};
+var RISK={13:['Source access and approvals: start requests in week one.','Capacity: confirm named client owners and the delivery pod.','Stakeholder alignment: agree decision rights and KPI definitions before build.'],12:{2:'No clear sign-off owner: name one in week one.'},4:{1:'KPI definitions may be disputed across companies.',2:'Excel adjustments may bypass the platform.'},9:{3:'Platform choice is open: decide on skills, cost and time-to-value.'}};
+var KPI=['close cycle days','manual adjustments removed and reconciliation breaks','time to onboard an acquisition'];
+var A=[];var out=document.getElementById('sb-out'),qs=document.getElementById('sb-q');
+function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function ans(i){return A[i]!=null}
+function model(){var m={};
+m.closing='From this, I\u2019d propose a 90-day slice: '+(ans(0)?DEC[A[0]]:'[Decision]')+' on '+(ans(9)?STK[A[9]]:'[Stack]')+', with '+(ans(12)?OWN[A[12]]:'[Owner]')+' signing off the definitions. Does that match your priorities?';
+m.plan=['0-90 days: deliver '+(ans(0)?DEC[A[0]]:'the priority outcome')+', reconciled to the GL, with minimal master data (entity, CoA, cost center, currency, period).','Year 1: shared ingestion and modelling patterns, onboard the next domains'+(A[2]===0?', and make add-on onboarding a repeatable pattern.':'.'),'Later: full MDM and governance expansion, then AI use cases (variance commentary, forecasting, anomaly detection) on certified Gold data.'];
+m.design=[];[1,2,3,4,5,6,7,8,10,11].forEach(function(k){if(ans(k))m.design.push(DES[k][A[k]])});
+m.risks=[];if(ans(13))m.risks.push(RISK[13][A[13]]);if(ans(12)&&RISK[12][A[12]])m.risks.push(RISK[12][A[12]]);if(ans(4)&&RISK[4][A[4]])m.risks.push(RISK[4][A[4]]);if(ans(9)&&RISK[9][A[9]])m.risks.push(RISK[9][A[9]]);
+m.kpi=ans(14)?'Value measure: '+KPI[A[14]]+'.':'Agree value KPIs: close days, adjustments removed, onboarding time.';
+m.open=[];Q.forEach(function(q,i){if(!ans(i))m.open.push(q[1])});
+return m}
+function list(title,items){var d=h('div');d.appendChild(h('h3',null,title));var u=h('ul','sm');items.forEach(function(t){u.appendChild(h('li',null,t))});d.appendChild(u);return d}
+function render(){var m=model(),n=A.filter(function(x){return x!=null}).length;out.textContent='';
+out.appendChild(h('h3',null,'Your solution statement ('+n+'/15 answered)'));
+var p=h('div','prog');var i=h('i');i.style.width=(n/15*100)+'%';p.appendChild(i);out.appendChild(p);
+out.appendChild(h('p',null,'\u201c'+m.closing+'\u201d'));
+var b1=h('button','act','Copy statement');b1.onclick=function(){copy(m)};var b2=h('button','act','Reset');b2.onclick=function(){A=[];draw();render()};out.appendChild(b1);out.appendChild(b2);
+out.appendChild(list('Recommended approach',m.plan));
+if(m.design.length)out.appendChild(list('Key design choices',m.design));
+if(m.risks.length)out.appendChild(list('Risks to manage',m.risks));
+out.appendChild(h('p','sm',m.kpi));
+if(m.open.length)out.appendChild(h('p','sm mut','Open questions: '+m.open.join(', ')+'.'))}
+function copy(m){var t=m.closing+'\n\n'+m.plan.join('\n')+'\n\nDesign choices:\n- '+m.design.join('\n- ')+'\n\nRisks:\n- '+m.risks.join('\n- ')+'\n\n'+m.kpi;try{navigator.clipboard.writeText(t)}catch(e){}}
+function draw(){qs.textContent='';Q.forEach(function(q,i){var c=h('div','box');c.appendChild(h('div','qh',q[0]+' \u00b7 Q'+(i+1)));c.appendChild(h('b',null,q[1]));c.appendChild(h('div','sm',q[2]));
+q[3].forEach(function(o,j){var b=h('button','opt',o);b.setAttribute('aria-pressed',A[i]===j);b.onclick=function(){A[i]=(A[i]===j)?null:j;draw();render()};c.appendChild(b)});qs.appendChild(c)})}
+draw();render();
+})();
+</script></body></html>

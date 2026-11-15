@@ -1,0 +1,2 @@
+# The bootstrap AI demo uses only Python's standard library.
+# Future RAG / agent dependencies will be added per lab to avoid a heavy initial install.
