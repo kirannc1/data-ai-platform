@@ -16,3 +16,45 @@ Outputs are created under `outputs/data-platform/` (gitignored). Next labs: sche
 ## Local reconciliation sources
 
 [Set up ERPNext and PostgreSQL](source-setup/README.md) for the bank reconciliation demo.
+
+## Data Layer 
+```mermaid
+flowchart TB
+    subgraph SOURCES["Source systems on 192.168.29.250"]
+        ERP["ERPNext<br/>Bank GL entries"]
+        PG["PostgreSQL<br/>Bank account mappings"]
+        FILES["MinIO source bucket<br/>Bank statement CSVs"]
+        KAFKA["Redpanda<br/>bank.statement.received"]
+    end
+
+    subgraph INGESTION["Ingestion and processing"]
+        AIRFLOW["Apache Airflow<br/>Schedule and monitor batch jobs"]
+        BATCH["Python extraction jobs<br/>ERPNext API and PostgreSQL query"]
+        CONSUMER["Redpanda consumer<br/>Read event and fetch statement"]
+        SPARK["Apache Spark<br/>Parse extracts and write Delta tables"]
+
+        AIRFLOW -->|Orchestrates| BATCH
+    end
+
+    ERP -->|REST API| BATCH
+    PG -->|SQL snapshot| BATCH
+    KAFKA -->|Event with bucket and object key| CONSUMER
+    FILES -->|CSV read via S3 API| CONSUMER
+
+    subgraph LAKEHOUSE["Lakehouse on MinIO"]
+        RAW["Raw landing<br/>Original extracts, events, and CSVs"]
+        BRONZE["Bronze Delta<br/>GL entries, mappings, events, and statement rows"]
+        SILVER["Silver Delta<br/>Validated transactions and normalized ledger entries"]
+        GOLD["Gold Delta<br/>Reconciliation results, exceptions, and metrics"]
+
+        RAW -->|Read landed data| SPARK
+        SPARK --> BRONZE
+        BRONZE -->|Spark validation and standardization| SILVER
+        SILVER -->|Spark matching and aggregation| GOLD
+    end
+
+    BATCH -->|Land API extracts and SQL snapshots| RAW
+    CONSUMER -->|Archive event and original CSV| RAW
+
+    GOLD --> AI["AI layer<br/>Explain exceptions and answer reconciliation questions"]
+```

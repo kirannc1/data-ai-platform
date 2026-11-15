@@ -10,7 +10,7 @@ services:
       - "127.0.0.1:9001:9001"
     environment:
       MINIO_ROOT_USER: reconciliation
-      MINIO_ROOT_PASSWORD: reconciliation-local-demo
+      MINIO_ROOT_PASSWORD: reconciliation-local-demo # from secret manager
     volumes:
       - minio-data:/data
 
