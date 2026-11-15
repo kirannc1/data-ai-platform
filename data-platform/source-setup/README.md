@@ -6,7 +6,7 @@ Install Docker with the Compose plugin, and Git. Use synthetic records in these 
 
 Run the official demo from a directory outside this repository:
 
-```bash
+```powershell
 git clone https://github.com/frappe/frappe_docker.git
 cd frappe_docker
 docker compose -p reconciliation-erp -f pwd.yml up -d
@@ -26,7 +26,7 @@ Give a separate API user read access to the relevant GL Entry records. Verify th
 
 From this directory, edit `seed.sql` to match the ERP company and account names before the first start. The seed runs on a fresh database volume.
 
-```bash
+```powershell
 docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml config --services
 docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml up -d
 docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml exec postgres psql -U demo -d reconciliation -c "SELECT * FROM bank_account_mapping;"
@@ -41,7 +41,7 @@ Run the query once initialization completes. Expect one mapping for `BANK-INR-00
 | MinIO | Stores original bank statement files for ingestion and replay | A synthetic CSV with a ₹10,000 withdrawal |
 | Redpanda | Delivers events that trigger ingestion | A `bank.statement.received` event pointing to the CSV in MinIO |
 
-```bash
+```powershell
 docker compose -f .\compose.sources.yml up -d redpanda
 docker compose -f .\compose.sources.yml exec redpanda rpk cluster info
 
@@ -57,6 +57,40 @@ docker compose -p reconciliation-sources -f compose.sources.yml exec -T redpanda
 docker compose -p reconciliation-sources -f compose.sources.yml exec -T redpanda rpk topic list -X brokers=redpanda:9092
 ```
 
+## Airflow Compose setup
+
+```powershell
+docker compose version
+
+New-Item -ItemType Directory -Force .\data-layer\airflow | Out-Null
+Set-Location .\data-layer\airflow
+
+curl.exe --fail --location "https://airflow.apache.org/docs/apache-airflow/3.3.1/docker-compose.yaml" --output docker-compose.yaml
+
+New-Item -ItemType Directory -Force dags, logs, plugins, config | Out-Null
+Set-Content -Path .env -Value 'AIRFLOW_UID=50000' -Encoding ascii
+```
+
+In docker-compose.yaml, find the airflow-apiserver port mapping and change "8080:8080" to:
+```powershell
+      - "127.0.0.1:8081:8080"
+```
+Initialize and start Airflow
+
+```powershell
+$bytes = New-Object byte[] 32
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($bytes)
+$rng.Dispose()
+
+$key = [Convert]::ToBase64String($bytes).Replace('+', '-').Replace('/', '_')
+Add-Content -Path .env -Value "FERNET_KEY=$key" -Encoding ascii
+Remove-Variable key, bytes
+
+docker compose -p reconciliation-airflow up airflow-init
+docker compose -p reconciliation-airflow up -d
+docker compose -p reconciliation-airflow ps
+```
 
 ## First integration check
 
@@ -66,7 +100,7 @@ Use the mapping to select the ERP cash account. Confirm that the posted INR 10,0
 
 These commands delete the respective demo volumes and their data. Run each from its own Compose directory.
 
-```bash
+```powershell
 docker compose -p reconciliation-db down -v
 docker compose -p reconciliation-erp -f pwd.yml down -v
 ```
