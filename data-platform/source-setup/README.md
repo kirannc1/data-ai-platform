@@ -12,7 +12,7 @@ cd frappe_docker
 docker compose -p reconciliation-erp -f pwd.yml up -d
 docker compose -p reconciliation-erp -f pwd.yml logs -f create-site
 
-$seed = "..\data-ai-platform\source-setup\seed_erpnext_demo.py"
+$seed = "..\enterprise-data-ai-platform\data-platform\source-setup"
 
 docker compose -p reconciliation-erp -f pwd.yml cp "$seed" backend:/tmp/seed_erpnext_demo.py
 docker compose -p reconciliation-erp -f pwd.yml exec -T -w /home/frappe/frappe-bench backend ./env/bin/python -u /tmp/seed_erpnext_demo.py frontend
@@ -27,10 +27,9 @@ Give a separate API user read access to the relevant GL Entry records. Verify th
 From this directory, edit `seed.sql` to match the ERP company and account names before the first start. The seed runs on a fresh database volume.
 
 ```bash
-docker compose -p reconciliation-db up -d
-docker compose -p reconciliation-db logs postgres
-docker compose -p reconciliation-db exec postgres \
-  psql -U demo -d reconciliation -c 'SELECT * FROM bank_account_mapping;'
+docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml config --services
+docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml up -d
+docker compose -p reconciliation-db -f ..\data-ai-platform\data-platform\source-setup\compose.yaml exec postgres psql -U demo -d reconciliation -c "SELECT * FROM bank_account_mapping;"
 ```
 
 Run the query once initialization completes. Expect one mapping for `BANK-INR-001`. PostgreSQL listens on localhost port 5433 for host clients.
