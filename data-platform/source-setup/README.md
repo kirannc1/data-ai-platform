@@ -42,8 +42,11 @@ Run the query once initialization completes. Expect one mapping for `BANK-INR-00
 | Redpanda | Delivers events that trigger ingestion | A `bank.statement.received` event pointing to the CSV in MinIO |
 
 ```bash
-docker compose -p reconciliation-sources -f compose.sources.yml up -d
-docker compose -p reconciliation-sources -f compose.sources.yml ps
+docker compose -f .\compose.sources.yml up -d redpanda
+docker compose -f .\compose.sources.yml exec redpanda rpk cluster info
+
+docker compose -f .\compose.sources.yml up -d --build --no-deps minio
+Invoke-WebRequest -Uri http://127.0.0.1:9000/minio/health/live
 ```
 
 MinIO — Open the console, sign in with demo-storage / demo-storage-local, and create a bucket named bank-statements. The S3 API endpoint is http://localhost:19000.
