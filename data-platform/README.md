@@ -1,5 +1,7 @@
 # Data platform
 
+This enterprise data platform starter uses bank statement reconciliation to demonstrate multi-source ingestion, Bronze–Silver–Gold processing, data quality checks, and traceable reconciliation results.
+
 Target Azure: ADF/Event Hubs -> company-isolated ADLS Gen2 -> Databricks/Delta Bronze, Silver, Gold -> Unity Catalog/Databricks SQL/Power BI, with Purview, MDM and security as cross-cutting capabilities.
 
 ## **Silver Delta snapshot replay** 
@@ -29,6 +31,11 @@ The demo reconciles a synthetic **₹10,000 bank withdrawal** against a submitte
 | Gold | Silver tables for the same run | One result per Silver GL entry, with match status, reason, rule version, and evidence references |
 
 Gold checks account mapping, amount, direction, currency, and the configured date window. The notebook covers matched, unmatched, ambiguous, incomplete coverage, and mapping-exception outcomes. Direction, currency, and statement coverage are explicit demo inputs because the current Silver statement schema does not carry them. The demo uses synthetic data and a bounded run. Scheduled ingestion, cross-file deduplication, statement-side exception reporting, and AI consumption are future work.
+
+### Planned enterprise extensions
+
+- **Master data management (MDM).** Extend the existing PostgreSQL account   mapping with canonical company and bank-account IDs, effective-dated   source mappings, and a process for resolving mapping conflicts.
+- **Dimensional modeling.** Add a reconciliation reporting fact with an   explicit grain and shared company, bank account, date, and currency   dimensions. Retain the existing Gold detail for transaction investigation.
 
 ## Data layer architecture
 
