@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: api
-          image: enterprise-ai-platform:0.2.2
+          image: enterprise-ai-platform:0.3.5
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
@@ -39,6 +39,14 @@ spec:
               value: "127.0.0.1"
             - name: SPARK_LOCAL_HOSTNAME
               value: "localhost"
+            - name: GOLD_ALLOWED_COMPANIES
+              value: "Demo Finance"
+            - name: FINANCE_POLICY_OBJECT_KEY
+              value: "bank-statement-reconciliation-policy.md"
+            - name: FINANCE_POLICY_VERSION
+              value: "1.0.0"
+            - name: FINANCE_POLICY_SHARED_CANDIDATE_HEADING
+              value: "3.4 Ambiguous match or account mapping"
           resources:
             requests:
               cpu: 100m
@@ -62,13 +70,6 @@ spec:
             httpGet:
               path: /healthz
               port: http
-          resources:
-            requests:
-              cpu: 100m
-              memory: 512Mi
-            limits:
-              cpu: 2
-              memory: 2Gi
 ---
 apiVersion: v1
 kind: Service
