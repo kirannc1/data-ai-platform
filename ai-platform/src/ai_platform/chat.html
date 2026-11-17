@@ -261,6 +261,12 @@
         width: 100%;
       }
     }
+
+    #company,
+    #company option {
+      color: #172a3d;
+      background-color: #fff;
+    }
   </style>
 </head>
 
@@ -307,6 +313,15 @@
     const form = document.querySelector("#chat-form");
     const question = document.querySelector("#question");
     const send = document.querySelector("#send");
+
+    question.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+
+      event.preventDefault();
+      if (!event.repeat && !send.disabled && question.value.trim()) {
+        form.requestSubmit(send);
+      }
+    });
 
     function addMessage(kind, text) {
       const message = document.createElement("p");
@@ -382,7 +397,11 @@
 
       for (const citation of citations) {
         addLine(`${citation.document_id} v${citation.version} · ${citation.section}`);
-        addLine(citation.excerpt);
+
+        const excerpt = citation.excerpt?.trim();
+        if (excerpt && excerpt !== body.reply?.trim()) {
+          addLine(excerpt);
+        }
       }
 
       reply.after(details);

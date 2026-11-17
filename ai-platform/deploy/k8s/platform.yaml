@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: api
-          image: enterprise-ai-platform:0.3.5
+          image: enterprise-ai-platform:0.4.5
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
@@ -47,6 +47,21 @@ spec:
               value: "1.0.0"
             - name: FINANCE_POLICY_SHARED_CANDIDATE_HEADING
               value: "3.4 Ambiguous match or account mapping"
+            - name: OLLAMA_BASE_URL
+              value: "http://ollama:11434"
+            - name: POLICY_EMBEDDING_MODEL
+              value: "embeddinggemma"
+            - name: FINANCE_POLICY_COMPANIES
+              value: "Demo Finance"
+            - name: OPENAI_POLICY_MODEL
+              value: "gpt-5.4-mini"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-policy-api
+                  key: OPENAI_API_KEY
+            - name: OLLAMA_POLICY_MODEL
+              value: "qwen2.5:1.5b"
           resources:
             requests:
               cpu: 100m

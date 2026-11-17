@@ -232,3 +232,85 @@ def get_reconciliation_evidence(
         "run_id": run_id,
         "shared_statement_candidates": shared,
     }
+
+def summarize_reconciliation_run(
+    *, company: str, allowed_companies: list[str]
+) -> dict:
+    if company not in allowed_companies:
+        raise PermissionError("Company is outside the permitted scope.")
+
+    run_id = os.environ["DEMO_RUN_ID"]
+    bucket = os.environ["GOLD_BUCKET"]
+    source = os.environ["GOLD_SOURCE_INSTANCE"]
+    path = f"s3a://{bucket}/tables/bank_reconciliation/{run_id}"
+
+    scoped = create_spark().read.format("delta").load(path).where(
+        (F.col("company") == company)
+        & (F.col("demo_run_id") == run_id)
+        & (F.col("source_instance") == source)
+    )
+
+    status_counts = {
+        row["status"]: row["count"]
+        for row in scoped.groupBy("status").count().orderBy("status").collect()
+    }
+
+    shared_candidates = (
+        scoped.where(F.col("status") == "AMBIGUOUS")
+        .select("gl_id", F.explode("candidates").alias("candidate"))
+        .select(
+            "gl_id",
+            F.col("candidate.raw_uri").alias("raw_uri"),
+            F.col("candidate.transaction_id").alias("transaction_id"),
+        )
+        .groupBy("raw_uri", "transaction_id")
+        .agg(
+            F.countDistinct("gl_id").alias("claimant_count"),
+            F.min("gl_id").alias("example_gl_id"),
+        )
+        .where(F.col("claimant_count") > 1)
+        .orderBy(F.desc("claimant_count"), "raw_uri", "transaction_id")
+        .take(11)
+    )
+
+    return {
+        "company": company,
+        "run_id": run_id,
+        "total_entries": sum(status_counts.values()),
+        "status_counts": status_counts,
+        "shared_candidates": [row.asDict() for row in shared_candidates[:10]],
+        "more_shared_candidates": len(shared_candidates) > 10,
+    }
+
+def get_statement_claims(
+    *, company: str, transaction_id: str, allowed_companies: list[str]
+) -> dict:
+    if company not in allowed_companies:
+        raise PermissionError("Company is outside the permitted scope.")
+
+    run_id = os.environ["DEMO_RUN_ID"]
+    bucket = os.environ["GOLD_BUCKET"]
+    source = os.environ["GOLD_SOURCE_INSTANCE"]
+    path = f"s3a://{bucket}/tables/bank_reconciliation/{run_id}"
+
+    scoped = create_spark().read.format("delta").load(path).where(
+        (F.col("company") == company)
+        & (F.col("demo_run_id") == run_id)
+        & (F.col("source_instance") == source)
+    )
+
+    lines = (
+        scoped.select("gl_id", F.explode("candidates").alias("candidate"))
+        .where(
+            F.upper(F.col("candidate.transaction_id")) == transaction_id.upper()
+        )
+        .groupBy("candidate.raw_uri", "candidate.transaction_id")
+        .agg(
+            F.countDistinct("gl_id").alias("claimant_count"),
+            F.slice(F.sort_array(F.collect_set("gl_id")), 1, 20)
+            .alias("claimant_gl_ids"),
+        )
+        .take(2)
+    )
+
+    return {"run_id": run_id, "statement_lines": [row.asDict() for row in lines]}
