@@ -1,2 +1,3 @@
-# The bootstrap AI demo uses only Python's standard library.
-# Future RAG / agent dependencies will be added per lab to avoid a heavy initial install.
+fastapi==0.115.12
+uvicorn==0.34.2
+pyspark==3.5.6

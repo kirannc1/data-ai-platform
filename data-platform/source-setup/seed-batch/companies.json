@@ -1,0 +1,14 @@
+[
+  {
+    "id": "demo-finance",
+    "company": "Demo Finance",
+    "bank_gl": "Demo Operating Bank - DF",
+    "expense_gl": "Demo Operating Expense - DF"
+  },
+  {
+    "id": "demo-trading",
+    "company": "Demo Trading",
+    "bank_gl": "Demo Operating Bank - DT",
+    "expense_gl": "Demo Operating Expense - DT"
+  }
+]

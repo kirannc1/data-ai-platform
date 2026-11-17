@@ -17,3 +17,7 @@ artifacts/
 outputs/
 .cache/
 .html
+.helpful_commands
+PKG-INFO
+data-platform/src/enterprise_data_platform.egg-info
+ai-platform/src/enterprise_ai_platform.egg-info/PKG-INFO

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "domain_id": "finance",
+  "product_id": "finance-reconciliation",
+  "owner": "Finance Operations",
+  "data_scope": {"companies": ["Demo Finance"]},
+  "tools": ["get_reconciliation_result", "retrieve_finance_policy"],
+  "approved_models": [],
+  "limits": {"max_input_tokens": 2048, "max_output_tokens": 512, "max_model_calls": 2}
+}
